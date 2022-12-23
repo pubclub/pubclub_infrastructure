@@ -13,12 +13,12 @@ terraform {
 }
 
 provider "aws" {
-  region                   = "eu-west-2"
-  shared_credentials_files = ["$HOME/.aws/credentials"]
+  region                   = var.region
+  shared_credentials_files = [var.credentials_file]
 }
 
 resource "aws_dynamodb_table" "ratings-table" {
-  name           = "ratings-table"
+  name           = var.ratings-table-name
   billing_mode   = "PROVISIONED"
   read_capacity  = 5
   write_capacity = 5
