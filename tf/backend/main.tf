@@ -17,48 +17,95 @@ provider "aws" {
   shared_credentials_files = [var.credentials_file]
 }
 
-resource "aws_dynamodb_table" "ratings-table" {
-  name           = var.ratings-table-name
-  billing_mode   = "PROVISIONED"
+resource "aws_cognito_user_pool" "pubclub-users" {
+  name = "pubclub-users"
+
+  username_attributes      = ["email"]
+  auto_verified_attributes = ["email"]
+
+  password_policy {
+    minimum_length = 6
+  }
+
+  schema {
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    name                     = "email"
+    required                 = true
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 256
+    }
+  }
+
+  schema {
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    name                     = "name"
+    required                 = true
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 256
+    }
+  }
+
+}
+
+module "ratings-table" {
+  source         = "../modules/dynamodb"
+  table_name     = "ratings-table"
+  partition_key  = "RatingId"
+  sort_key       = "CreationDate"
   read_capacity  = 5
   write_capacity = 5
-  hash_key       = "RatingId"
-  range_key      = "CreationDate"
+  attributes = [
+    {
+      name = "RatingId",
+      type = "S",
+    },
+    {
+      name = "CreationDate",
+      type = "S",
+    },
+    {
+      name = "UserId",
+      type = "S",
+    },
+    {
+      name = "PlaceId",
+      type = "S",
+    },
+  ]
+  secondary_indices = [
+    {
+      name            = "UserIdIndex",
+      hash_key        = "UserId",
+      projection_type = "ALL",
+    },
+    {
+      name            = "PlaceIdIndex",
+      hash_key        = "PlaceId",
+      projection_type = "ALL",
+    },
+  ]
+}
 
-  attribute {
-    name = "RatingId"
-    type = "S"
-  }
-
-  attribute {
-    name = "CreationDate"
-    type = "S"
-  }
-
-  attribute {
-    name = "UserId"
-    type = "S"
-  }
-
-  attribute {
-    name = "PlaceId"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "UserIdIndex"
-    hash_key        = "UserId"
-    projection_type = "ALL"
-    read_capacity   = 5
-    write_capacity  = 5
-  }
-
-  global_secondary_index {
-    name            = "PlaceIdIndex"
-    hash_key        = "PlaceId"
-    projection_type = "ALL"
-    read_capacity   = 5
-    write_capacity  = 5
-  }
-
+module "user-table" {
+  source         = "../modules/dynamodb"
+  table_name     = "users-table"
+  partition_key  = "UserId"
+  sort_key       = null
+  read_capacity  = 5
+  write_capacity = 5
+  attributes = [
+    {
+      name = "UserId",
+      type = "S",
+    },
+  ]
+  secondary_indices = []
 }
