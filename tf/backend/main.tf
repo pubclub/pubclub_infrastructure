@@ -17,6 +17,11 @@ provider "aws" {
   shared_credentials_files = [var.credentials_file]
 }
 
+# Bucket for storing app artifacts e.g. builds for lambda functions
+resource "aws_s3_bucket" "pubclub-artifacts" {
+  bucket = "pubclub-artifacts"
+}
+
 resource "aws_cognito_user_pool" "pubclub-users" {
   name = "pubclub-users"
 
@@ -51,6 +56,10 @@ resource "aws_cognito_user_pool" "pubclub-users" {
       min_length = 1
       max_length = 256
     }
+  }
+
+  lambda_config {
+    post_confirmation = "arn:aws:lambda:${var.region}:${var.project_id}:function:${var.function_name}"
   }
 
 }
