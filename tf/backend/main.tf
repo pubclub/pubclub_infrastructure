@@ -19,11 +19,12 @@ provider "aws" {
 
 # Bucket for storing app artifacts e.g. builds for lambda functions
 resource "aws_s3_bucket" "pubclub-artifacts" {
-  bucket = "pubclub-artifacts"
+  bucket = var.artifact_bucket
 }
 
 resource "aws_cognito_user_pool" "pubclub-users" {
-  name = "pubclub-users"
+  for_each = var.confirmation_lambda_config
+  name     = "pubclub-users"
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
@@ -59,7 +60,7 @@ resource "aws_cognito_user_pool" "pubclub-users" {
   }
 
   lambda_config {
-    post_confirmation = "arn:aws:lambda:${var.region}:${var.project_id}:function:${var.function_name}"
+    post_confirmation = "arn:aws:lambda:${var.region}:${var.project_id}:function:${each.value.function_name}"
   }
 
 }
@@ -117,4 +118,13 @@ module "user-table" {
     },
   ]
   secondary_indices = []
+}
+
+module "confirmation_function" {
+  for_each              = var.confirmation_lambda_config
+  source                = "../modules/lambda_function"
+  bucket_name           = var.artifact_bucket
+  filename              = each.value.filename
+  function_name         = each.value.function_name
+  environment_variables = each.value.environment_variables
 }

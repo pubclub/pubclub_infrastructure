@@ -11,12 +11,22 @@ variable "credentials_file" {
   description = "Path to file containing AWS credentials"
 }
 
+variable "artifact_bucket" {
+  type        = string
+  description = "Name of bucket to store project artifacts (e.g. builds)"
+}
+
 variable "ratings-table-name" {
   type        = string
   description = "Name for ratings table"
 }
 
-variable "function_name" {
-  type        = string
-  description = "Name of cloud function to link to Cognito"
+variable "confirmation_lambda_config" {
+  description = "Map of configuration options for the Lambda function for writing post-confirmation users to DynamoDB"
+  type = map(object({
+    filename              = string
+    function_name         = string
+    environment_variables = map(string)
+  }))
+  default = {}
 }
