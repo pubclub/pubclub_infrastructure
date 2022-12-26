@@ -1,6 +1,11 @@
-variable "function_filename" {
+variable "bucket_name" {
   type        = string
-  description = "Path to zip file containing lambda function"
+  description = "Name of S3 bucket where executable is found"
+}
+
+variable "filename" {
+  type        = string
+  description = "Path of executable file in S3 bucket"
 }
 
 variable "function_name" {
