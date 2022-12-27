@@ -102,5 +102,16 @@ module "confirmation_function" {
   bucket_name           = var.artifact_bucket
   filename              = each.value.filename
   function_name         = each.value.function_name
+  function_iam_name     = each.value.function_iam_name
+  environment_variables = each.value.environment_variables
+}
+
+module "ratings-function" {
+  for_each              = var.ratings_lambda_config
+  source                = "../modules/lambda_function"
+  bucket_name           = var.artifact_bucket
+  filename              = each.value.filename
+  function_name         = each.value.function_name
+  function_iam_name     = each.value.function_iam_name
   environment_variables = each.value.environment_variables
 }

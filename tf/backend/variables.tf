@@ -26,6 +26,18 @@ variable "confirmation_lambda_config" {
   type = map(object({
     filename              = string
     function_name         = string
+    function_iam_name     = string
+    environment_variables = map(string)
+  }))
+  default = {}
+}
+
+variable "ratings_lambda_config" {
+  description = "Map of configuration options for the Lambda function for handling ratings"
+  type = map(object({
+    filename              = string
+    function_name         = string
+    function_iam_name     = string
     environment_variables = map(string)
   }))
   default = {}
