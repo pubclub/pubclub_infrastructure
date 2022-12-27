@@ -22,47 +22,23 @@ resource "aws_s3_bucket" "pubclub-artifacts" {
   bucket = var.artifact_bucket
 }
 
-resource "aws_cognito_user_pool" "pubclub-users" {
+module "pubclub-users" {
   for_each = var.confirmation_lambda_config
-  name     = "pubclub-users"
 
-  username_attributes      = ["email"]
-  auto_verified_attributes = ["email"]
-
-  password_policy {
-    minimum_length = 6
-  }
-
-  schema {
-    attribute_data_type      = "String"
-    developer_only_attribute = false
-    mutable                  = true
-    name                     = "email"
-    required                 = true
-
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 256
-    }
-  }
-
-  schema {
-    attribute_data_type      = "String"
-    developer_only_attribute = false
-    mutable                  = true
-    name                     = "name"
-    required                 = true
-
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 256
-    }
-  }
-
-  lambda_config {
-    post_confirmation = "arn:aws:lambda:${var.region}:${var.project_id}:function:${each.value.function_name}"
-  }
-
+  source         = "../modules/cognito"
+  user_pool_name = "pubclub-users"
+  schema = [
+    {
+      name = "email"
+    },
+    {
+      name = "name"
+    },
+  ]
+  region                = var.region
+  project_id            = var.project_id
+  lambda_function_name  = each.value.function_name
+  user_pool_client_name = "pubclub-userpool-client"
 }
 
 module "ratings-table" {
