@@ -13,6 +13,11 @@ variable "function_name" {
   description = "Name of lambda function"
 }
 
+variable "function_iam_name" {
+  type        = string
+  description = "Name of the IAM role created for the lambda function"
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "Key-values for any environment variables to use in function"

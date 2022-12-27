@@ -1,5 +1,5 @@
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
+  name = var.function_iam_name
 
   assume_role_policy = <<EOF
 {
@@ -19,7 +19,7 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_dynamodb" {
-  name        = "lambda_dynamodb"
+  name        = "${aws_iam_role.iam_for_lambda.name}_dynamodb_policy"
   path        = "/"
   description = "IAM policy for accessing DynamoDB from a lambda"
 
@@ -46,7 +46,7 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_logging" {
-  name        = "lambda_logging"
+  name        = "${aws_iam_role.iam_for_lambda.name}_logging_policy"
   path        = "/"
   description = "IAM policy for allowing lambda to write to CloudWatch logs"
 
