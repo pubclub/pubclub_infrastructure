@@ -22,25 +22,6 @@ resource "aws_s3_bucket" "pubclub-artifacts" {
   bucket = var.artifact_bucket
 }
 
-# module "pubclub-users" {
-#   for_each = var.confirmation_lambda_config
-
-#   source         = "../modules/cognito"
-#   user_pool_name = var.user_pool_name
-#   schema = [
-#     {
-#       name = "email"
-#     },
-#     {
-#       name = "name"
-#     },
-#   ]
-#   region                = var.region
-#   project_id            = var.project_id
-#   lambda_function_name  = each.value.function_name
-#   user_pool_client_name = "pubclub-userpool-client"
-# }
-
 module "pubclub-users" {
   source         = "../modules/cognito"
   user_pool_name = "pubclub-users"
@@ -52,10 +33,9 @@ module "pubclub-users" {
       name = "name"
     },
   ]
-  region               = var.region
-  project_id           = var.project_id
-  lambda_function_name = var.confirmation_function_name
-  # lambda_function_name  = "dynamo-confirm-user"
+  region                = var.region
+  project_id            = var.project_id
+  lambda_function_name  = var.confirmation_function_name
   user_pool_client_name = "pubclub-userpool-client"
 }
 
@@ -135,12 +115,11 @@ module "ratings-function" {
 }
 
 module "ratings-api" {
-  for_each     = var.ratings_lambda_config
-  source       = "../modules/api_gateway"
-  project_id   = var.project_id
-  region       = var.region
-  gateway_name = "ratings-gateway"
-  cognito_arn  = "arn:aws:cognito-idp:${var.region}:${var.project_id}:userpool/${module.pubclub-users.pool_id}"
-  # cognito_arn = module.pubclub-users.arn
+  for_each             = var.ratings_lambda_config
+  source               = "../modules/api_gateway"
+  project_id           = var.project_id
+  region               = var.region
+  gateway_name         = "ratings-gateway"
+  cognito_arn          = "arn:aws:cognito-idp:${var.region}:${var.project_id}:userpool/${module.pubclub-users.pool_id}"
   lambda_function_name = each.value.function_name
 }
